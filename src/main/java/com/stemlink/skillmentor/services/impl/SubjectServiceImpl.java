@@ -12,6 +12,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -24,50 +25,70 @@ public class SubjectServiceImpl implements SubjectService {
     private final MentorRepository mentorRepository;
     private final ModelMapper modelMapper;
 
-    public List<Subject> getAllSubjects(){
+    @Override
+    public List<Subject> getAllSubjects() {
         try {
             return subjectRepository.findAll();
         } catch (Exception exception) {
-            log.error("Failed to get all subjects", exception);
+            log.error("Failed to fetch subjects", exception);
             throw new SkillMentorException("Failed to get all subjects", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
-    public Subject addNewSubject(Long mentorId, Subject subject){
+    @Override
+    @Transactional
+    public Subject addNewSubject(Long mentorId, Subject subject) {
         try {
-            Mentor mentor = mentorRepository.findByMentorId(String.valueOf(mentorId)).orElseThrow(
-                    () -> new SkillMentorException("Mentor not found", HttpStatus.NOT_FOUND)
+            // Fix: Use the Long ID directly if that is the primary key type
+            Mentor mentor = mentorRepository.findById(mentorId).orElseThrow(
+                    () -> new SkillMentorException("Mentor not found with ID: " + mentorId, HttpStatus.NOT_FOUND)
             );
+
             subject.setMentor(mentor);
+
+            // Initialize enrollment if null, then increment
+            int currentEnrollment = (subject.getSubjectEnrollment() == null) ? 0 : subject.getSubjectEnrollment();
+            subject.setSubjectEnrollment(currentEnrollment + 1);
+
             return subjectRepository.save(subject);
+
         } catch (SkillMentorException e) {
             throw e;
         } catch (DataIntegrityViolationException e) {
-            log.error("Data integrity violation while adding subject: {}", e.getMessage());
-            throw new SkillMentorException("Subject already exists or database constraint violation", HttpStatus.CONFLICT);
+            log.error("Conflict while adding subject: {}", e.getMessage());
+            throw new SkillMentorException("Subject already exists or constraint violation", HttpStatus.CONFLICT);
         } catch (Exception exception) {
-            log.error("Failed to add new subject", exception);
+            log.error("Unexpected error adding subject", exception);
             throw new SkillMentorException("Failed to add new subject", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
-    public Subject getSubjectById(Long id){
+    @Override
+    public Subject getSubjectById(Long id) {
         return subjectRepository.findById(id).orElseThrow(
-                () -> new SkillMentorException("Subject not found", HttpStatus.NOT_FOUND)
+                () -> new SkillMentorException("Subject not found with ID: " + id, HttpStatus.NOT_FOUND)
         );
     }
 
-    public Subject updateSubjectById(Long id, Subject updatedSubject){
+    @Override
+    @Transactional
+    public Subject updateSubjectById(Long id, Subject updatedSubject) {
         try {
-            Subject subject = subjectRepository.findById(id).orElseThrow(
-                    () -> new SkillMentorException("Subject not found", HttpStatus.NOT_FOUND)
-            );
-            modelMapper.map(updatedSubject, subject);
-            return subjectRepository.save(subject);
+            Subject existingSubject = getSubjectById(id);
+
+            // Map changes from updatedSubject to existingSubject
+            // Ensure the ID of the existing entity isn't overwritten
+            modelMapper.getConfiguration().setSkipNullEnabled(true);
+            modelMapper.map(updatedSubject, existingSubject);
+
+            // Explicitly re-set the ID just in case
+            existingSubject.setId(id);
+
+            return subjectRepository.save(existingSubject);
         } catch (SkillMentorException e) {
             throw e;
         } catch (DataIntegrityViolationException e) {
-            log.error("Data integrity violation while updating subject: {}", e.getMessage());
+            log.error("Conflict while updating subject: {}", e.getMessage());
             throw new SkillMentorException("Database constraint violation", HttpStatus.CONFLICT);
         } catch (Exception exception) {
             log.error("Error updating subject", exception);
@@ -75,11 +96,21 @@ public class SubjectServiceImpl implements SubjectService {
         }
     }
 
-    public void deleteSubject(Long id){
+    @Override
+    @Transactional
+    public void deleteSubject(Long id) {
+        Subject subject;
+        if (!subjectRepository.existsById(id)) {
+            throw new SkillMentorException("Cannot delete: Subject not found", HttpStatus.NOT_FOUND);
+        }
         try {
+
+
             subjectRepository.deleteById(id);
+
+
         } catch (Exception exception) {
-            log.error("Failed to delete subject with id {}", id, exception);
+            log.error("Failed to delete subject ID {}", id, exception);
             throw new SkillMentorException("Failed to delete subject", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

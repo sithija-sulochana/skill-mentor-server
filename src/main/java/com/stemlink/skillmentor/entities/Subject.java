@@ -32,11 +32,21 @@ public class Subject implements Serializable {
     @Column(name = "course_image_url")
     private String courseImageUrl;
 
+    @Column(name = "course_icon")
+    private String courseIcon;
+
+
     // --------- Relationship -------------
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "mentor_id", nullable = false)
     @JsonIgnore
     private Mentor mentor;
+
+    @Column(name = "subjectEnrollment")
+    private Integer subjectEnrollment;
+
+
+
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)

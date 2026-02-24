@@ -3,6 +3,7 @@ package com.stemlink.skillmentor.utils;
 import com.stemlink.skillmentor.entities.Mentor;
 import com.stemlink.skillmentor.entities.Session;
 import com.stemlink.skillmentor.entities.Student;
+import com.stemlink.skillmentor.entities.Subject;
 import com.stemlink.skillmentor.exceptions.SkillMentorException;
 import org.springframework.http.HttpStatus;
 
@@ -80,4 +81,6 @@ public class ValidationUtils {
         calendar.add(Calendar.MINUTE, minutes);
         return calendar.getTime();
     }
+
+
 }

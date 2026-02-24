@@ -15,6 +15,9 @@ public class SubjectDTO {
 
     private String courseImageUrl;
 
+
+    private String courseIcon;
+
     @NotNull
     private Long mentorId;
 }

@@ -71,6 +71,7 @@ public class Mentor implements Serializable {
     @Column(name = "start_year", length = 10)
     private String startYear;
 
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private Date createdAt;
@@ -78,6 +79,7 @@ public class Mentor implements Serializable {
     @UpdateTimestamp
     @Column(name = "updated_at")
     private Date updatedAt;
+
 
     @OneToMany(mappedBy = "mentor")
     private List<Subject> subjects;
