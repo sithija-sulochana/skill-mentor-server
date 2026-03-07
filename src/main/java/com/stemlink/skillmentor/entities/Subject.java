@@ -2,6 +2,7 @@ package com.stemlink.skillmentor.entities;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -29,7 +30,7 @@ public class Subject implements Serializable {
     @Column(nullable = false)
     private String description;
 
-    @Column(name = "course_image_url")
+    @Column(name = "course_image_url",columnDefinition = "TEXT")
     private String courseImageUrl;
 
     @Column(name = "course_icon")
@@ -38,12 +39,15 @@ public class Subject implements Serializable {
 
     // --------- Relationship -------------
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "mentor_id", nullable = false)
+    @JoinColumn(name = "mentor_id", nullable = false , referencedColumnName = "mentor_id")
     @JsonIgnore
     private Mentor mentor;
 
     @Column(name = "subjectEnrollment")
-    private Integer subjectEnrollment;
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private Integer subjectEnrollment=0;
+
+
 
 
 

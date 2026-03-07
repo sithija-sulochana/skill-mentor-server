@@ -13,12 +13,16 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+
+import javax.security.sasl.AuthenticationException;
 
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
+ // Only allow users with ADMIN or MENTOR roles to access mentor service methods
 public class MentorServiceImpl implements MentorService {
 
     private final MentorRepository mentorRepository;
@@ -27,10 +31,22 @@ public class MentorServiceImpl implements MentorService {
     @CacheEvict(value = "mentors", allEntries = true)
     public Mentor createNewMentor(Mentor mentor) {
         try {
-            return mentorRepository.save(mentor);
+            // Create new instance and map input to it (not repository)
+            Mentor newMentor = new Mentor();
+
+            modelMapper.map(mentor, newMentor);
+
+            if(mentorRepository.existsByMentorId(mentor.getMentorId())){
+                throw new SkillMentorException("Mentor with this ID already exists", HttpStatus.CONFLICT);
+
+            }
+
+            return mentorRepository.save(newMentor);
+
         } catch (DataIntegrityViolationException e) {
             log.error("Data integrity violation while creating mentor: {}", e.getMessage());
             throw new SkillMentorException("Mentor with this email already exists", HttpStatus.CONFLICT);
+
         } catch (Exception exception) {
             log.error("Failed to create new mentor", exception);
             throw new SkillMentorException("Failed to create new mentor", HttpStatus.INTERNAL_SERVER_ERROR);

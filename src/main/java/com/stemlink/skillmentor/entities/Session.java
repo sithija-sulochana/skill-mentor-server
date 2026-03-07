@@ -1,6 +1,7 @@
 package com.stemlink.skillmentor.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -10,6 +11,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 @Entity
 @AllArgsConstructor
@@ -22,16 +24,18 @@ public class Session implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
     @ManyToOne
     @JoinColumn(name = "student_id", nullable = false)
     @JsonIgnore
+    @JsonManagedReference
     private Student student;
 
     @ManyToOne
     @JoinColumn(name = "mentor_id", nullable = false)
     @JsonIgnore
+    @JsonManagedReference
     private Mentor mentor;
 
     @ManyToOne
@@ -48,7 +52,7 @@ public class Session implements Serializable {
     @Column(name = "session_status", length = 50)
     private String sessionStatus;
 
-    @Column(name = "meeting_link")
+    @Column(name = "meeting_link", columnDefinition = "TEXT", length = 255)
     private String meetingLink;
 
     @Column(name = "session_notes", columnDefinition = "TEXT")
@@ -63,6 +67,8 @@ public class Session implements Serializable {
     @Column(name = "payment_status", length = 20)
     private String paymentStatus;
 
+
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private Date createdAt;
@@ -70,4 +76,11 @@ public class Session implements Serializable {
     @UpdateTimestamp
     @Column(name = "updated_at")
     private Date updatedAt;
+
+    @OneToMany(mappedBy = "session")
+    @JsonIgnore
+    private List<Reviews> reviews;
+
+    @OneToOne(mappedBy = "session", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Payment payment;
 }

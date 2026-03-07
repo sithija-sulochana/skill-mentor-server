@@ -37,7 +37,7 @@ public class SubjectServiceImpl implements SubjectService {
 
     @Override
     @Transactional
-    public Subject addNewSubject(Long mentorId, Subject subject) {
+        public Subject addNewSubject(Long mentorId, Subject subject) {
         try {
             // Fix: Use the Long ID directly if that is the primary key type
             Mentor mentor = mentorRepository.findById(mentorId).orElseThrow(

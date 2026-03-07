@@ -46,14 +46,16 @@ public class StudentController extends AbstractController{
     public ResponseEntity<Student> createStudent(@Valid @RequestBody StudentDTO studentDTO, Authentication authentication) {
         UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
 
-        Student student = modelMapper.map(studentDTO, Student.class);
+        // Build student from identity (no DTO)
+        Student student = new Student();
         student.setStudentId(userPrincipal.getId());
         student.setFirstName(userPrincipal.getFirstName());
         student.setLastName(userPrincipal.getLastName());
         student.setEmail(userPrincipal.getEmail());
 
-        Student createdStudent = studentService.createNewStudent(student);
-        return sendCreatedResponse(createdStudent);
+        Student created = studentService.createOrFind(student);
+
+        return sendCreatedResponse(created);
     }
 
     @PutMapping("{id}")
@@ -70,4 +72,14 @@ public class StudentController extends AbstractController{
         studentService.deleteStudent(id);
         return sendNoContentResponse();
     }
+
+    @GetMapping("/id/{clerkId}")
+    public Student getStudentId(@PathVariable String clerkId){
+
+        return studentService.findByStudentId(clerkId);
+    }
+
+
+
+
 }

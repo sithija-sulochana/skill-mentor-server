@@ -12,4 +12,7 @@ public interface StudentService {
     Student getStudentById(Integer id);
     Student updateStudentById(Integer id, Student updatedStudent);
     void deleteStudent(Integer id);
+    public Student createOrFind(Student student);
+    Student findByStudentId(String studentId);
+
 }

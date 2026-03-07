@@ -144,9 +144,14 @@ public class ClerkValidator implements TokenValidator {
             // Get the public key from the JWK
             PublicKey publicKey = jwk.getPublicKey();
 
-            // Create algorithm and verify the token
+            // Create algorithm
             Algorithm algorithm = Algorithm.RSA256((java.security.interfaces.RSAPublicKey) publicKey, null);
-            JWT.require(algorithm).build().verify(token);
+
+            // FIX: Add 60 seconds of leeway to account for clock skew
+            JWT.require(algorithm)
+                    .acceptLeeway(60) // Accept 60 seconds of difference in 'iat', 'exp', and 'nbf'
+                    .build()
+                    .verify(token);
 
             log.debug("Token signature verified successfully for kid: {}", kid);
             return true;

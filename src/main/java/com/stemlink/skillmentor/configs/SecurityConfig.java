@@ -1,6 +1,7 @@
 package com.stemlink.skillmentor.configs;
 
 //import com.stemlink.skillmentor.security.JwtAuthenticationFilter;
+import com.stemlink.skillmentor.constants.UserRoles;
 import com.stemlink.skillmentor.security.AuthenticationFilter;
 import com.stemlink.skillmentor.security.SkillMentorAuthenticationEntryPoint;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,7 @@ import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.http.HttpMethod;
 
 @Configuration
 @EnableWebSecurity
@@ -54,6 +56,10 @@ public class SecurityConfig {
                         ).permitAll()
                         // Public read access to mentors from home page
                         .requestMatchers(HttpMethod.GET, "/api/v1/mentors", "/api/v1/mentors/*").permitAll()
+                        .requestMatchers("/api/v1/admin/**").hasRole(UserRoles.ROLE_ADMIN) // Admin-only endpoints
+
+
+
                         .anyRequest().authenticated()
                 )
             .addFilterBefore(clerkAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)

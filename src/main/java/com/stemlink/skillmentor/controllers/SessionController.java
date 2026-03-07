@@ -3,7 +3,9 @@ package com.stemlink.skillmentor.controllers;
 
 import com.stemlink.skillmentor.dto.SessionDTO;
 import com.stemlink.skillmentor.dto.response.SessionResponseDTO;
+import com.stemlink.skillmentor.entities.Mentor;
 import com.stemlink.skillmentor.entities.Session;
+import com.stemlink.skillmentor.entities.Subject;
 import com.stemlink.skillmentor.security.UserPrincipal;
 import com.stemlink.skillmentor.services.SessionService;
 import jakarta.validation.Valid;
@@ -17,6 +19,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.stemlink.skillmentor.constants.UserRoles.ROLE_ADMIN;
+
 @RestController
 @RequestMapping(path = "/api/v1/sessions")
 @RequiredArgsConstructor
@@ -26,11 +30,16 @@ public class SessionController extends AbstractController {
 
     private final SessionService sessionService;
 
-    @GetMapping
-    public List<Session> getAllSessions() {
-        return sessionService.getAllSessions();
-    }
 
+    @GetMapping
+    @PreAuthorize("hasAnyRole('" + ROLE_ADMIN + "')")
+    public ResponseEntity<List<SessionResponseDTO>> getAllSessions() {
+        List<Session> sessions = sessionService.getAllSessions();
+        List<SessionResponseDTO> response = sessions.stream()
+                .map(this::toSessionResponseDTO)
+                .collect(Collectors.toList());
+        return sendOkResponse(response);
+    }
     @GetMapping("{id}")
     public Session getSessionById(@PathVariable Long id) {
         return sessionService.getSessionById(id);
@@ -58,6 +67,10 @@ public class SessionController extends AbstractController {
             Authentication authentication) {
         UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
         Session session = sessionService.enrollSession(userPrincipal, sessionDTO);
+        Subject subject = session.getSubject();
+
+        int currentCount = (subject.getSubjectEnrollment() != null) ? subject.getSubjectEnrollment() : 0;
+        subject.setSubjectEnrollment(currentCount + 1);
         return sendCreatedResponse(toSessionResponseDTO(session));
     }
 
@@ -83,5 +96,27 @@ public class SessionController extends AbstractController {
         dto.setPaymentStatus(session.getPaymentStatus());
         dto.setMeetingLink(session.getMeetingLink());
         return dto;
+    }
+
+    @GetMapping("/{sessionId}/mentor")
+    public ResponseEntity<Mentor> getMentorBySessionId(
+            @PathVariable Long sessionId) {
+
+        return ResponseEntity.ok(
+                sessionService.getMentorBySessionId(sessionId)
+        );
+    }
+
+    @GetMapping("/mentors/{mentorId}")
+    public ResponseEntity<List<SessionResponseDTO>> getSessionsByMentorId(
+            @PathVariable Long mentorId) {
+
+        List<Session> sessions = sessionService.getSessionsByMentorId(mentorId);
+
+        List<SessionResponseDTO> response = sessions.stream()
+                .map(this::toSessionResponseDTO)
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(response);
     }
 }

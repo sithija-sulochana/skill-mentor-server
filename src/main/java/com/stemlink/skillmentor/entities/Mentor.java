@@ -46,9 +46,10 @@ public class Mentor implements Serializable {
     @Column(name = "profession")
     private String profession;
 
+
+
     @Column(name = "company")
     private String company;
-
     @Column(name = "experience_years")
     private int experienceYears;
 
@@ -56,11 +57,9 @@ public class Mentor implements Serializable {
     private String bio;
 
     // Additional fields required for frontend mentor profile displays
-    @Column(name = "profile_image_url")
-    private String profileImageUrl;
+    @Column(name = "profile_image_url", columnDefinition = "TEXT")
 
-    @Column(name = "positive_reviews")
-    private Integer positiveReviews;
+    private String profileImageUrl;
 
     @Column(name = "total_enrollments")
     private Integer totalEnrollments;
@@ -87,5 +86,15 @@ public class Mentor implements Serializable {
     @JsonIgnore
     @OneToMany(mappedBy = "mentor")
     private List<Session> sessions;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "mentor")
+    private List<Reviews> reviews;
+
+    @Column(name = "average_rating")
+    private Double averageRating=0.0;
+
+    @Column(name = "total_ratings")
+    private Integer totalRatings=0;
 
 }

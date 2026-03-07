@@ -41,9 +41,7 @@ public class MentorDTO {
     // Additional fields required for frontend mentor profile displays
     private String profileImageUrl;
 
-    private Integer positiveReviews;
 
-    private Integer totalEnrollments;
 
     private Boolean isCertified;
 

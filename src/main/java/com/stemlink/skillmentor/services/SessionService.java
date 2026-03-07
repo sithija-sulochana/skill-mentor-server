@@ -1,6 +1,7 @@
 package com.stemlink.skillmentor.services;
 
 import com.stemlink.skillmentor.dto.SessionDTO;
+import com.stemlink.skillmentor.entities.Mentor;
 import com.stemlink.skillmentor.entities.Session;
 import com.stemlink.skillmentor.security.UserPrincipal;
 
@@ -17,4 +18,8 @@ public interface SessionService {
     // Frontend enrollment flow — student is resolved from the Clerk JWT
     Session enrollSession(UserPrincipal userPrincipal, SessionDTO sessionDTO);
     List<Session> getSessionsByStudentEmail(String email);
+    Mentor getMentorBySessionId(Long sessionId);
+    public List<Session> getSessionsByMentorId(Long mentorId);
+
+
 }

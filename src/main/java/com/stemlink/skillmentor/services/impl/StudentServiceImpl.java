@@ -73,4 +73,29 @@ public class StudentServiceImpl implements StudentService {
         }
     }
 
+    public Student createOrFind(Student student) {
+        return studentRepository.findByStudentId(student.getStudentId())
+                .orElseGet(() -> {
+                    try {
+                        return studentRepository.save(student);
+                    } catch (DataIntegrityViolationException e) {
+                        throw new SkillMentorException("Student already exists", HttpStatus.CONFLICT);
+                    }
+                });
+    }
+
+    @Override
+    public Student findByStudentId(String studentId) {
+        try {
+            return studentRepository.findByStudentId(studentId)
+                    .orElseThrow(() -> new SkillMentorException("Student not found with studentId: " + studentId, HttpStatus.NOT_FOUND));
+
+        } catch (SkillMentorException e) {
+            throw e;
+        } catch (Exception exception) {
+            log.error("Failed to find student by studentId {}", studentId, exception);
+            throw new SkillMentorException("Failed to find student", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
 }

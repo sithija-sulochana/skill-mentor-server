@@ -9,13 +9,14 @@ import java.util.Date;
 @Data
 public class SessionDTO {
 
-    @NotNull(message = "Student ID cannot be null")
+
+
     private Integer studentId;
 
-    @NotNull(message = "Mentor ID cannot be null")
+
     private Long mentorId;
 
-    @NotNull(message = "Subject ID cannot be null")
+
     private Long subjectId;
 
     @NotNull(message = "Session date/time cannot be null")

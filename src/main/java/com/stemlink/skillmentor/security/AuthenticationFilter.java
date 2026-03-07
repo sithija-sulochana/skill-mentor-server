@@ -27,6 +27,7 @@ public class AuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response, @Nonnull FilterChain filterChain)
             throws ServletException, IOException {
 
+
         String token = extractToken(request);
 
         if (token != null && tokenValidator.validateToken(token)) {
@@ -38,22 +39,29 @@ public class AuthenticationFilter extends OncePerRequestFilter {
             String firstName = tokenValidator.extractFirstName(token);
             String lastName = tokenValidator.extractLastName(token);
 
+
             UserPrincipal userPrincipal = new UserPrincipal(userId,email,firstName,lastName);
             //UserPrincipal userPrincipal = UserPrincipal.builder().id(userId)...
 
 
             // Extract roles from the token
             List<String> roles = tokenValidator.extractRoles(token);
+
+
             List<GrantedAuthority> authorities = roles != null ?
                     roles.stream()
-                            .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
+                            .map(role -> new SimpleGrantedAuthority("ROLE_" + role.toUpperCase()))
                             .collect(Collectors.toList()) :
+
                     new ArrayList<>();
+            System.out.println(authorities);
 
             UsernamePasswordAuthenticationToken authentication =
                     new UsernamePasswordAuthenticationToken(userPrincipal, null, authorities);
             SecurityContextHolder.getContext().setAuthentication(authentication);
+
         }
+
 
         filterChain.doFilter(request, response);
     }
