@@ -123,4 +123,14 @@ public class ReviewServiceImpl implements ReviewService {
         }
 
     }
+
+    @Override
+    public List<Reviews> getReviewsByMentorId(Integer mentorId) {
+        try {
+            return reviewRepository.findByMentorId(mentorId);
+        } catch (Exception e) {
+            log.error("Error fetching reviews by mentor id: {}", e.getMessage());
+            throw new SkillMentorException("Failed to fetch reviews for mentor", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 }

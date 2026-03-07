@@ -28,19 +28,17 @@ public class Session implements Serializable {
 
     @ManyToOne
     @JoinColumn(name = "student_id", nullable = false)
-    @JsonIgnore
-    @JsonManagedReference
+
     private Student student;
 
     @ManyToOne
     @JoinColumn(name = "mentor_id", nullable = false)
-    @JsonIgnore
-    @JsonManagedReference
+
     private Mentor mentor;
 
     @ManyToOne
     @JoinColumn(name = "subject_id", nullable = false)
-    @JsonIgnore
+
     private Subject subject;
 
     @Column(name = "session_at", nullable = false)

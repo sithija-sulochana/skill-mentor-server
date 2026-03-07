@@ -30,7 +30,8 @@ public class Subject implements Serializable {
     @Column(nullable = false)
     private String description;
 
-    @Column(name = "course_image_url",columnDefinition = "TEXT")
+
+    @Column(name = "course_image_url",columnDefinition = "TEXT", length = 555)
     private String courseImageUrl;
 
     @Column(name = "course_icon")

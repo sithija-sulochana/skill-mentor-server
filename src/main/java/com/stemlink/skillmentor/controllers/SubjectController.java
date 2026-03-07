@@ -23,6 +23,7 @@ import static com.stemlink.skillmentor.constants.UserRoles.ROLE_MENTOR;
 @RequestMapping(path = "/api/v1/subjects")
 @RequiredArgsConstructor
 @PreAuthorize("isAuthenticated()")
+
 public class SubjectController  {
 
     private final ModelMapper modelMapper;

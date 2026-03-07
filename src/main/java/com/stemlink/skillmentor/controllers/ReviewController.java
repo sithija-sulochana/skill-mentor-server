@@ -46,4 +46,9 @@ public class ReviewController {
         reviewService.deleteReview(id);
     }
 
+    @GetMapping("/mentor/{mentorId}")
+    public List<Reviews> getReviewsByMentorId(@PathVariable Integer mentorId) {
+        return reviewService.getReviewsByMentorId(mentorId);
+    }
+
 }

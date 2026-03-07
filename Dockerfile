@@ -5,10 +5,12 @@ WORKDIR /app
 COPY . .
 
 # Build the application
-RUN mvn package -DskipTests
+# Note: Ensure you have deleted the 'springdoc-openapi-ui' (v1.7.0) 
+# dependency from your pom.xml before running this build!
+RUN mvn clean package -DskipTests
 
-# Expose the port Render injects via the PORT env var
-EXPOSE ${PORT:-8081}
+# Standardize on port 8080
+EXPOSE 8080
 
-# Run the application directly from the target folder
-ENTRYPOINT ["java", "-jar", "target/skillmentor-0.0.1-SNAPSHOT.jar"]
+# Run the application and explicitly bind to port 8080
+ENTRYPOINT ["java", "-Dserver.port=8080", "-jar", "target/skillmentor-0.0.1-SNAPSHOT.jar"]

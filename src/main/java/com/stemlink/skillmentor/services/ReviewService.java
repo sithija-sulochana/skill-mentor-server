@@ -11,5 +11,6 @@ public interface ReviewService {
     Reviews getReviewById(Long id);
     Reviews updateReviewById(Long id, ReviewDTO updatedReviewDTO);
     void deleteReview(Long id);
+    public List<Reviews> getReviewsByMentorId(Integer mentorId);
 
 }

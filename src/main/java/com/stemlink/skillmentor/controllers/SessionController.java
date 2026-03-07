@@ -72,6 +72,9 @@ public class SessionController extends AbstractController {
         int currentCount = (subject.getSubjectEnrollment() != null) ? subject.getSubjectEnrollment() : 0;
         subject.setSubjectEnrollment(currentCount + 1);
         return sendCreatedResponse(toSessionResponseDTO(session));
+
+        // Set enroll count
+
     }
 
     @GetMapping("/my-sessions")
@@ -119,4 +122,5 @@ public class SessionController extends AbstractController {
 
         return ResponseEntity.ok(response);
     }
+
 }

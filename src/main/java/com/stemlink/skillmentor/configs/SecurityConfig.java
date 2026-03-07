@@ -57,6 +57,7 @@ public class SecurityConfig {
                         // Public read access to mentors from home page
                         .requestMatchers(HttpMethod.GET, "/api/v1/mentors", "/api/v1/mentors/*").permitAll()
                         .requestMatchers("/api/v1/admin/**").hasRole(UserRoles.ROLE_ADMIN) // Admin-only endpoints
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // Allow all preflight requests
 
 
 
