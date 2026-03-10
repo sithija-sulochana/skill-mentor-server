@@ -1,6 +1,5 @@
 package com.stemlink.skillmentor.configs;
 
-//import com.stemlink.skillmentor.security.JwtAuthenticationFilter;
 import com.stemlink.skillmentor.constants.UserRoles;
 import com.stemlink.skillmentor.security.AuthenticationFilter;
 import com.stemlink.skillmentor.security.SkillMentorAuthenticationEntryPoint;
@@ -20,7 +19,6 @@ import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.http.HttpMethod;
 
 @Configuration
 @EnableWebSecurity
@@ -29,22 +27,29 @@ import org.springframework.http.HttpMethod;
 public class SecurityConfig {
 
     private final AuthenticationFilter clerkAuthenticationFilter;
-
     private final SkillMentorAuthenticationEntryPoint skillMentorAuthenticationEntryPoint;
     private final CorsConfigurationSource corsConfigurationSource;
-
-    //TODO: handle unauthorized error 403
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            .cors(cors -> cors.configurationSource(corsConfigurationSource))
-            .csrf(AbstractHttpConfigurer::disable)
+                // 1. Apply the CORS configuration from your CorsConfig bean
+                .cors(cors -> cors.configurationSource(corsConfigurationSource))
+
+                // 2. Disable CSRF for stateless REST APIs
+                .csrf(AbstractHttpConfigurer::disable)
+
+                // 3. Set Session to Stateless (since we use JWT/Clerk tokens)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+
+                // 4. Handle Unauthorized Access
                 .exceptionHandling(exception -> exception
                         .authenticationEntryPoint(skillMentorAuthenticationEntryPoint)
                 )
+
+                // 5. Request Authorization Rules
                 .authorizeHttpRequests(auth -> auth
+                        // Public/Swagger Endpoints
                         .requestMatchers(
                                 "/api/public/**",
                                 "/v3/api-docs/**",
@@ -54,23 +59,33 @@ public class SecurityConfig {
                                 "/webjars/**",
                                 "/swagger-resources/**"
                         ).permitAll()
-                        // Public read access to mentors from home page
-                        .requestMatchers(HttpMethod.GET, "/api/v1/mentors", "/api/v1/mentors/*").permitAll()
-                        .requestMatchers("/api/v1/admin/**").hasRole(UserRoles.ROLE_ADMIN) // Admin-only endpoints
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // Allow all preflight requests
 
+                        // Public access to view mentors (crucial for home page visitors)
+                        // Note: Use "/**" to capture pagination and path variables properly
+                        .requestMatchers(HttpMethod.GET, "/api/v1/mentors/**").permitAll()
 
+                        // Admin-only endpoints
+                        .requestMatchers("/api/v1/admin/**").hasRole(UserRoles.ROLE_ADMIN)
 
+                        // CRITICAL: Always permit OPTIONS for CORS preflight
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+
+                        // Everything else requires a valid Clerk token
                         .anyRequest().authenticated()
                 )
-            .addFilterBefore(clerkAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-            .httpBasic(AbstractHttpConfigurer::disable);
+
+                // 6. Add the Clerk JWT filter before the standard login filter
+                .addFilterBefore(clerkAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+
+                // 7. Disable Basic Auth (not needed for this setup)
+                .httpBasic(AbstractHttpConfigurer::disable);
 
         return http.build();
     }
 
     @Bean
     public UserDetailsService userDetailsService() {
+        // Since Clerk handles user management, we don't need a local DB for auth
         return new InMemoryUserDetailsManager();
     }
 
