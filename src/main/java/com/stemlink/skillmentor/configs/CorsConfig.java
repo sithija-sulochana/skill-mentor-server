@@ -9,28 +9,44 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
 import java.util.List;
+
 @Configuration
 public class CorsConfig {
 
-    @Value("${CORS_ALLOWED_ORIGINS:http://localhost:3001,http://localhost:5173,http://localhost:8080,https://skill-mentor-frontend-final-cgtkn0t7k.vercel.app}")
+    @Value("${CORS_ALLOWED_ORIGINS:http://localhost:3001,http://localhost:5173,http://localhost:8080,https://skill-mentor-frontend-final.vercel.app}")
     private String allowedOrigins;
-
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // Parse allowed origins from properties
+        // 1. Parse origins and allow for wildcards in subdomains
         List<String> origins = Arrays.asList(allowedOrigins.split(","));
-        configuration.setAllowedOrigins(origins);
 
-        // Allow specific HTTP methods
+        // Use OriginPatterns to support Vercel preview URLs (the ones with random hashes)
+        // This ensures https://skill-mentor-frontend-final-anyhash.vercel.app works too.
+        configuration.setAllowedOriginPatterns(Arrays.asList(
+                "http://localhost:3001",
+                "http://localhost:5173",
+                "https://skill-mentor-frontend-final.vercel.app",
+                "https://skill-mentor-frontend-final-*.vercel.app"
+        ));
+
+        // 2. Standard HTTP Methods
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
 
-        // Allow specific headers
-        configuration.setAllowedHeaders(Arrays.asList("*"));
+        // 3. Headers - Be explicit when allowCredentials is true
+        configuration.setAllowedHeaders(Arrays.asList(
+                "Authorization",
+                "Content-Type",
+                "Accept",
+                "Origin",
+                "X-Requested-With",
+                "Access-Control-Request-Method",
+                "Access-Control-Request-Headers"
+        ));
 
-        // Expose response headers to client
+        // 4. Exposed Headers for the Frontend
         configuration.setExposedHeaders(Arrays.asList(
                 "Authorization",
                 "X-Rate-Limit-Remaining",
@@ -38,16 +54,12 @@ public class CorsConfig {
                 "Retry-After"
         ));
 
-        // Allow credentials (cookies, authorization headers)
+        // 5. Security & Performance
         configuration.setAllowCredentials(true);
-
-        // Cache preflight requests for 1 hour
-        configuration.setMaxAge(3600L);
+        configuration.setMaxAge(3600L); // 1 hour cache for preflight
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
-
-
 
         return source;
     }
