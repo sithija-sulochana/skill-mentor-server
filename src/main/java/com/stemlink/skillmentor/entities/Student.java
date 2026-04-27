@@ -53,6 +53,10 @@ public class Student implements Serializable {
     @OneToMany(mappedBy = "student")
     private List<Session> sessions;
 
+    public List<Session> getSessions() {
+        return sessions;
+    }
+
     @OneToMany(mappedBy = "student")
     private List<Reviews> reviews;
 

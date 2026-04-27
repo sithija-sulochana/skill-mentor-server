@@ -94,4 +94,6 @@ public class MentorController extends AbstractController {
         mentorService.deleteMentor(id);
         return sendNoContentResponse();
     }
+
+
 }

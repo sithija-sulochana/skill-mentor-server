@@ -62,6 +62,7 @@ public class SessionController extends AbstractController {
 
     // Enrollment endpoint for students to enroll in a session
     @PostMapping("/enroll")
+
     public ResponseEntity<SessionResponseDTO> enroll(
             @RequestBody SessionDTO sessionDTO,
             Authentication authentication) {
@@ -69,8 +70,7 @@ public class SessionController extends AbstractController {
         Session session = sessionService.enrollSession(userPrincipal, sessionDTO);
         Subject subject = session.getSubject();
 
-        int currentCount = (subject.getSubjectEnrollment() != null) ? subject.getSubjectEnrollment() : 0;
-        subject.setSubjectEnrollment(currentCount + 1);
+
         return sendCreatedResponse(toSessionResponseDTO(session));
 
         // Set enroll count

@@ -97,4 +97,11 @@ public class Mentor implements Serializable {
     @Column(name = "total_ratings")
     private Integer totalRatings=0;
 
+
+    public List<Session> getSessions(){
+        return this.sessions;
+    }
+
+
+
 }

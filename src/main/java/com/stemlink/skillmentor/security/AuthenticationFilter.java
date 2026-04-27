@@ -5,6 +5,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
@@ -20,8 +21,11 @@ import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
+
 public class AuthenticationFilter extends OncePerRequestFilter {
     private final TokenValidator tokenValidator;
+
+
 
     @Override
     protected void doFilterInternal(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response, @Nonnull FilterChain filterChain)
@@ -32,16 +36,13 @@ public class AuthenticationFilter extends OncePerRequestFilter {
 
         if (token != null && tokenValidator.validateToken(token)) {
             String userId = tokenValidator.extractUserId(token);
-//            List<String> roles = new ArrayList<>();
-
-            // extract user id, first name, last name, email from token
             String email = tokenValidator.extractEmail(token);
             String firstName = tokenValidator.extractFirstName(token);
             String lastName = tokenValidator.extractLastName(token);
 
 
             UserPrincipal userPrincipal = new UserPrincipal(userId,email,firstName,lastName);
-            //UserPrincipal userPrincipal = UserPrincipal.builder().id(userId)...
+
 
 
             // Extract roles from the token

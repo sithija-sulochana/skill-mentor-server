@@ -13,6 +13,7 @@ import com.stemlink.skillmentor.dto.SessionDTO;
 import com.stemlink.skillmentor.security.UserPrincipal;
 import com.stemlink.skillmentor.services.SessionService;
 import com.stemlink.skillmentor.utils.ValidationUtils;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -120,6 +121,7 @@ public class SessionServiceImpl implements SessionService {
     }
 
     @Override
+    @Transactional
     public Session enrollSession(UserPrincipal userPrincipal, SessionDTO sessionDTO) {
         // Find student by email from JWT, or auto-create user on first enrollment
         Student student = studentRepository.findByEmail(userPrincipal.getEmail())
@@ -141,6 +143,8 @@ public class SessionServiceImpl implements SessionService {
         Subject subject = subjectRepository.findById(sessionDTO.getSubjectId())
                 .orElseThrow(() -> new SkillMentorException("Subject not found with id: " + sessionDTO.getSubjectId(), HttpStatus.NOT_FOUND));
 
+        int currentCount = (subject.getSubjectEnrollment() != null) ? subject.getSubjectEnrollment() : 0;
+        subject.setSubjectEnrollment(currentCount + 1);
         Session session = new Session();
         session.setStudent(student);
         session.setMentor(mentor);

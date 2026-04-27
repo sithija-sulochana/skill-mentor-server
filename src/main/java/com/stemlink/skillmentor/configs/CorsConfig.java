@@ -23,8 +23,8 @@ public class CorsConfig {
         // 1. Parse origins and allow for wildcards in subdomains
         List<String> origins = Arrays.asList(allowedOrigins.split(","));
 
-        // Use OriginPatterns to support Vercel preview URLs (the ones with random hashes)
-        // This ensures https://skill-mentor-frontend-final-anyhash.vercel.app works too.
+
+
         configuration.setAllowedOriginPatterns(Arrays.asList(
                 "http://localhost:3001",
                 "http://localhost:5173",

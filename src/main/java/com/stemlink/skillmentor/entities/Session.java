@@ -81,4 +81,16 @@ public class Session implements Serializable {
 
     @OneToOne(mappedBy = "session", cascade = CascadeType.ALL, orphanRemoval = true)
     private Payment payment;
+
+    public Integer getDurationMinutes() {
+        return durationMinutes;
+    }
+
+    public Date getSessionAt() {
+        return sessionAt;
+    }
+
+    public Date getCreatedAt() {
+        return createdAt;
+    }
 }
